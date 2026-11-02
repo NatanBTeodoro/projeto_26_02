@@ -1,0 +1,14 @@
+.cabecalho-pagina {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cabecalho-pagina__perfis {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--cor-texto-secundario);
+  font-size: 0.82rem;
+}

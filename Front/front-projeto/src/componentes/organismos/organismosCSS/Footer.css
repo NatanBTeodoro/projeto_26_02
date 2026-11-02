@@ -1,0 +1,17 @@
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.9rem var(--padding-pagina) 1.1rem;
+  color: var(--cor-texto-secundario);
+  font-size: 0.82rem;
+}
+
+.footer__status--ok {
+  color: var(--cor-sucesso);
+}
+
+.footer__status--falha {
+  color: var(--cor-erro);
+}

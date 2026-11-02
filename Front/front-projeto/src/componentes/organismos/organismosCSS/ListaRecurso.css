@@ -1,0 +1,41 @@
+.lista-recurso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.lista-recurso__tabela-wrap {
+  overflow: auto;
+  border: 1px solid var(--cor-linha);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-superficie);
+}
+
+.lista-recurso__tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.lista-recurso__tabela th,
+.lista-recurso__tabela td {
+  text-align: left;
+  padding: 0.65rem 0.75rem;
+  border-bottom: 1px solid var(--cor-linha);
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.lista-recurso__tabela th {
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--cor-texto-secundario);
+  background: var(--cor-creme);
+  position: sticky;
+  top: 0;
+}
+
+.lista-recurso__tabela tr:last-child td {
+  border-bottom: 0;
+}

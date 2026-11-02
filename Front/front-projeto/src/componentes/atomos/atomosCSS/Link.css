@@ -1,0 +1,14 @@
+.link {
+  color: var(--cor-marca-escura);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.link--discreto {
+  color: var(--cor-texto-secundario);
+  font-weight: 500;
+}

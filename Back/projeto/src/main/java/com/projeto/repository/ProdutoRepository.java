@@ -1,5 +1,6 @@
 package com.projeto.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,4 +14,6 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 	Page<Produto> findByEstabelecimentoId(Long estabelecimentoId, Pageable pageable);
 
 	Optional<Produto> findByIdAndEstabelecimentoId(Long id, Long estabelecimentoId);
+
+	List<Produto> findByEstabelecimentoIdAndAtivoTrue(Long estabelecimentoId);
 }

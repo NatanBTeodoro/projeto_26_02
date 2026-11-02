@@ -3,7 +3,8 @@ package com.projeto.util;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.mapping.PropertyReferenceException;
+import org.springframework.dao.InvalidDataAccessApiUsageException;
+import org.springframework.data.core.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -82,6 +83,15 @@ public class TratadorExcecoes {
 		return HttpRespostas.badRequest(ErroResposta.of(HttpStatus.BAD_REQUEST, mensagem, path(req)));
 	}
 
+	@ExceptionHandler(InvalidDataAccessApiUsageException.class)
+	public ResponseEntity<ErroResposta> usoInvalido(InvalidDataAccessApiUsageException ex, HttpServletRequest req) {
+		if (ex.getCause() instanceof PropertyReferenceException propriedade) {
+			return ordenacaoInvalida(propriedade, req);
+		}
+		return HttpRespostas.badRequest(
+				ErroResposta.of(HttpStatus.BAD_REQUEST, "Requisição malformada", path(req)));
+	}
+
 	@ExceptionHandler(RecursoJaExistenteException.class)
 	public ResponseEntity<ErroResposta> conflito(RecursoJaExistenteException ex, HttpServletRequest req) {
 		return HttpRespostas.conflict(ErroResposta.of(HttpStatus.CONFLICT, ex.getMessage(), path(req)));
@@ -99,8 +109,14 @@ public class TratadorExcecoes {
 				ErroResposta.of(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), path(req)));
 	}
 
-	@ExceptionHandler({ NaoAutenticadoException.class, AuthenticationException.class })
-	public ResponseEntity<ErroResposta> naoAutenticado(Exception ex, HttpServletRequest req) {
+	@ExceptionHandler(NaoAutenticadoException.class)
+	public ResponseEntity<ErroResposta> naoAutenticado(NaoAutenticadoException ex, HttpServletRequest req) {
+		return HttpRespostas.unauthorized(
+				ErroResposta.of(HttpStatus.UNAUTHORIZED, ex.getMessage(), path(req)));
+	}
+
+	@ExceptionHandler(AuthenticationException.class)
+	public ResponseEntity<ErroResposta> autenticacaoSpring(AuthenticationException ex, HttpServletRequest req) {
 		return HttpRespostas.unauthorized(
 				ErroResposta.of(HttpStatus.UNAUTHORIZED, "Autenticação necessária", path(req)));
 	}

@@ -54,6 +54,10 @@ public class Pedido {
 	@Column(name = "cliente_hash", length = 128)
 	private String clienteHash;
 
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "unidade_id")
+	private Unidade unidade;
+
 	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PedidoItem> itens = new ArrayList<>();
 }

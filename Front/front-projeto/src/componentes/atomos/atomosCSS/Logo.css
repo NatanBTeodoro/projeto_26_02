@@ -1,0 +1,47 @@
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--cor-branco);
+}
+
+.logo__marca {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.logo__marca i {
+  display: block;
+  border-radius: 3px;
+  background: var(--cor-terracota);
+}
+
+.logo__marca i:nth-child(2) { background: var(--cor-dourado); }
+.logo__marca i:nth-child(3) { background: #8d3b32; }
+.logo__marca i:nth-child(4) { background: #7d9a84; }
+
+.logo__textos {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.05;
+}
+
+.logo__textos strong {
+  font-family: var(--fonte-titulo);
+  font-size: 1.2rem;
+  font-weight: 560;
+}
+
+.logo__textos small {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+.logo--compacto .logo__textos strong {
+  font-size: 1.05rem;
+}

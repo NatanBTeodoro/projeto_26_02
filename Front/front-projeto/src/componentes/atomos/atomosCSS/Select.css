@@ -1,0 +1,17 @@
+.select {
+  width: 100%;
+  border: 1px solid var(--cor-linha);
+  background: var(--cor-branco);
+  border-radius: var(--raio-pequeno);
+  padding: 0.62rem 0.75rem;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--cor-oliva-claro);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cor-oliva-claro) 22%, transparent);
+}
+
+.select--erro {
+  border-color: var(--cor-erro);
+}

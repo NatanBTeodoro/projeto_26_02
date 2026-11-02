@@ -29,7 +29,9 @@ public final class PedidoDTO {
 			@NotNull Long estabelecimentoId,
 			@Size(max = 80) String externalId,
 			Instant dataHora,
-			@NotEmpty @Valid List<ItemCreate> itens) {
+			@NotEmpty @Valid List<ItemCreate> itens,
+			Long unidadeId,
+			@Size(max = 120) String clienteCodigo) {
 	}
 
 	public record Estorno(@NotBlank @Size(max = 255) String motivo) {
@@ -42,34 +44,36 @@ public final class PedidoDTO {
 			BigDecimal precoUnitario,
 			BigDecimal custoUnitario) {
 
-		public static ItemResponse from(PedidoItem item) {
+		public static ItemResponse from(PedidoItem item, boolean ocultarCusto) {
 			return new ItemResponse(
 					item.getId(),
 					item.getProduto().getId(),
 					item.getQuantidade(),
 					item.getPrecoUnitario(),
-					item.getCustoUnitario());
+					ocultarCusto ? null : item.getCustoUnitario());
 		}
 	}
 
 	public record Response(
 			Long id,
 			Long estabelecimentoId,
+			Long unidadeId,
 			String externalId,
 			Instant dataHora,
 			StatusPedido status,
 			String motivoEstorno,
 			List<ItemResponse> itens) {
 
-		public static Response from(Pedido pedido) {
+		public static Response from(Pedido pedido, boolean ocultarCusto) {
 			return new Response(
 					pedido.getId(),
 					pedido.getEstabelecimento().getId(),
+					pedido.getUnidade() != null ? pedido.getUnidade().getId() : null,
 					pedido.getExternalId(),
 					pedido.getDataHora(),
 					pedido.getStatus(),
 					pedido.getMotivoEstorno(),
-					pedido.getItens().stream().map(ItemResponse::from).toList());
+					pedido.getItens().stream().map(item -> ItemResponse.from(item, ocultarCusto)).toList());
 		}
 	}
 }

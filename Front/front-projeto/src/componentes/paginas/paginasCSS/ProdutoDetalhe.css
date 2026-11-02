@@ -1,0 +1,11 @@
+.produto-detalhe {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.produto-detalhe__coluna {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}

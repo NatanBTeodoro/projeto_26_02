@@ -1,0 +1,73 @@
+# Blueprint do Render: Postgres + API (Docker) + front estático.
+# O site e a API ficam em hosts diferentes. O navegador chama a API direto,
+# então os cookies de sessão saem com Secure, SameSite=None e Partitioned.
+
+databases:
+  - name: menu-engineering
+    plan: free
+    databaseName: menu_engineering
+    user: quadrante
+
+services:
+  - type: web
+    name: quadrante-api
+    runtime: docker
+    plan: free
+    region: oregon
+    rootDir: Back/projeto
+    dockerfilePath: Back/projeto/Dockerfile
+    dockerContext: Back/projeto
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: menu-engineering
+          property: connectionString
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=75.0
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: COOKIE_PARTITIONED
+        value: "true"
+      - key: CORS_ORIGENS
+        fromService:
+          name: quadrante-web
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+      - key: SEMENTE
+        value: "true"
+      - key: SEMENTE_EMAIL
+        value: admin@quadrante.local
+    buildFilter:
+      paths:
+        - Back/projeto/**
+        - render.yaml
+
+  - type: web
+    name: quadrante-web
+    runtime: static
+    rootDir: Front/front-projeto
+    buildCommand: npm ci && npm run build
+    staticPublishPath: Front/front-projeto/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_API_URL
+        fromService:
+          name: quadrante-api
+          type: web
+          envVarKey: RENDER_EXTERNAL_URL
+    buildFilter:
+      paths:
+        - Front/front-projeto/**
+        - render.yaml

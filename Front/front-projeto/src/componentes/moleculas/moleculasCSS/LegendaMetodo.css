@@ -1,0 +1,30 @@
+.legenda-metodo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.legenda-metodo code {
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.78rem;
+  background: var(--cor-creme);
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  color: var(--cor-texto-principal);
+}
+
+.legenda-metodo__verbo {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  border-radius: 4px;
+  padding: 0.12rem 0.35rem;
+  color: var(--cor-branco);
+  background: var(--cor-oliva);
+}
+
+.legenda-metodo__verbo--post { background: var(--cor-marca); }
+.legenda-metodo__verbo--put { background: var(--cor-ardosia); }
+.legenda-metodo__verbo--get { background: var(--cor-oliva); }
