@@ -39,7 +39,7 @@ services:
       - key: SEMENTE
         value: "true"
       - key: SEMENTE_EMAIL
-        value: admin@quadrante.local
+        value: admin@admin.com
     buildFilter:
       paths:
         - Back/projeto/**
