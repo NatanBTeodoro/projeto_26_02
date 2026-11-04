@@ -28,6 +28,13 @@ public final class UsuarioDTO {
 			Boolean ativo) {
 	}
 
+	public record Sessao(Long id, String email, Perfil perfil, boolean ativo, String token) {
+
+		public static Sessao de(Usuario usuario) {
+			return new Sessao(usuario.getId(), usuario.getEmail(), usuario.getPerfil(), usuario.isAtivo(), usuario.getTokenAcesso());
+		}
+	}
+
 	public record Response(Long id, String email, Perfil perfil, boolean ativo) {
 
 		public static Response de(Usuario usuario) {

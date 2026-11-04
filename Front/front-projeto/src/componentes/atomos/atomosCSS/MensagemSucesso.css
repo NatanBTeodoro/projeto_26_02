@@ -1,8 +1,0 @@
-.mensagem-sucesso {
-  margin: 0;
-  background: var(--cor-sucesso-fundo);
-  color: var(--cor-sucesso);
-  border-radius: var(--raio-pequeno);
-  padding: 0.7rem 0.85rem;
-  font-size: 0.92rem;
-}

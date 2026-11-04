@@ -4,8 +4,12 @@ CREATE TABLE IF NOT EXISTS usuario (
     senha_hash VARCHAR(72) NOT NULL,
     perfil VARCHAR(20) NOT NULL,
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
+    token_acesso VARCHAR(80),
     CONSTRAINT uk_usuario_email UNIQUE (email)
 );
+
+ALTER TABLE usuario ADD COLUMN IF NOT EXISTS token_acesso VARCHAR(80);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_usuario_token ON usuario (token_acesso);
 
 CREATE TABLE IF NOT EXISTS categoria (
     id BIGSERIAL PRIMARY KEY,

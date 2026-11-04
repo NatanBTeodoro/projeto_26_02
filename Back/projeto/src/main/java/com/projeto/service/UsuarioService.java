@@ -65,6 +65,7 @@ public class UsuarioService {
 		}
 		if (dto.senha() != null && !dto.senha().isBlank()) {
 			usuario.setSenhaHash(passwordEncoder.encode(dto.senha()));
+			usuario.setTokenAcesso(null);
 		}
 		if (dto.perfil() != null) {
 			exigirPerfil(dto.perfil());
@@ -75,6 +76,9 @@ public class UsuarioService {
 				throw new RegraDeNegocioException("Não é possível inativar o próprio usuário");
 			}
 			usuario.setAtivo(dto.ativo());
+			if (!dto.ativo()) {
+				usuario.setTokenAcesso(null);
+			}
 		}
 		return UsuarioDTO.Response.de(usuarioRepository.save(usuario));
 	}

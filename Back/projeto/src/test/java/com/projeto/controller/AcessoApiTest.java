@@ -13,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.projeto.config.SecurityConfig;
+import com.projeto.repository.UsuarioRepository;
 import com.projeto.seguranca.JsonAuthHandlers;
 import com.projeto.seguranca.UsuarioDetailsService;
 import com.projeto.service.UsuarioService;
@@ -30,6 +31,9 @@ class AcessoApiTest {
 
 	@MockitoBean
 	private UsuarioDetailsService usuarioDetailsService;
+
+	@MockitoBean
+	private UsuarioRepository usuarioRepository;
 
 	@Test
 	void semSessaoRetorna401() throws Exception {

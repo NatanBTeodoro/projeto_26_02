@@ -1,12 +1,14 @@
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY pom.xml .
+RUN mvn -B dependency:go-offline
 COPY src ./src
-RUN mvn -B -DskipTests package && cp target/*.jar /app/aplicacao.jar
+RUN mvn -B clean package -DskipTests
 
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/aplicacao.jar aplicacao.jar
-ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75.0"
+RUN addgroup -S spring && adduser -S spring -G spring
+USER spring
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "aplicacao.jar"]
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
