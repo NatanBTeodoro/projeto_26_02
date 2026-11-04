@@ -12,6 +12,15 @@ import org.junit.jupiter.api.Test;
 class RenderDatabaseUrlTest {
 
 	@Test
+	@DisplayName("A URL interna do Render fica sem SSL")
+	void urlInternaSemSsl() {
+		Map<String, Object> propriedades = RenderDatabaseUrl.traduzir(
+				"postgresql://quadrante:senha@dpg-abc-a/menu_engineering");
+
+		assertEquals("jdbc:postgresql://dpg-abc-a:5432/menu_engineering", propriedades.get("spring.datasource.url"));
+	}
+
+	@Test
 	@DisplayName("Converte a URL do Render para JDBC com SSL")
 	void converte() {
 		Map<String, Object> propriedades = RenderDatabaseUrl.traduzir(

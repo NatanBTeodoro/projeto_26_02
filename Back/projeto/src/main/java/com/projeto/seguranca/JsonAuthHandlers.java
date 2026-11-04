@@ -1,7 +1,6 @@
 package com.projeto.seguranca;
 
 import java.io.IOException;
-import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -10,19 +9,11 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class JsonAuthHandlers implements AuthenticationEntryPoint, AccessDeniedHandler {
-
-	private final ObjectMapper objectMapper;
-
-	public JsonAuthHandlers(ObjectMapper objectMapper) {
-		this.objectMapper = objectMapper;
-	}
 
 	@Override
 	public void commence(
@@ -44,6 +35,10 @@ public class JsonAuthHandlers implements AuthenticationEntryPoint, AccessDeniedH
 		response.setStatus(status.value());
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
-		objectMapper.writeValue(response.getOutputStream(), Map.of("mensagem", mensagem));
+		response.getWriter().write("{\"mensagem\":\"" + escapar(mensagem) + "\"}");
+	}
+
+	private static String escapar(String valor) {
+		return valor.replace("\\", "\\\\").replace("\"", "\\\"");
 	}
 }

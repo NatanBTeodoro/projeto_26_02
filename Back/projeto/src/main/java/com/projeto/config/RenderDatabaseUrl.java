@@ -54,14 +54,19 @@ public class RenderDatabaseUrl implements EnvironmentPostProcessor, Ordered {
 		String usuario = decodificar(userInfo.substring(0, separador));
 		String senha = decodificar(userInfo.substring(separador + 1));
 		int porta = uri.getPort() > 0 ? uri.getPort() : 5432;
+		String host = uri.getHost();
 		String caminho = uri.getPath() == null ? "" : uri.getPath();
 		String consulta = uri.getRawQuery();
-		String parametros = consulta == null || consulta.isBlank()
-				? "sslmode=require"
-				: consulta.contains("sslmode=") ? consulta : consulta + "&sslmode=require";
+		boolean externo = host != null && host.contains(".");
+		String parametros = consulta;
+		if (externo && (consulta == null || !consulta.contains("sslmode="))) {
+			parametros = consulta == null || consulta.isBlank() ? "sslmode=require" : consulta + "&sslmode=require";
+		}
+		String url = "jdbc:postgresql://" + host + ":" + porta + caminho
+				+ (parametros == null || parametros.isBlank() ? "" : "?" + parametros);
 
 		Map<String, Object> propriedades = new LinkedHashMap<>();
-		propriedades.put("spring.datasource.url", "jdbc:postgresql://" + uri.getHost() + ":" + porta + caminho + "?" + parametros);
+		propriedades.put("spring.datasource.url", url);
 		propriedades.put("spring.datasource.username", usuario);
 		propriedades.put("spring.datasource.password", senha);
 		return propriedades;

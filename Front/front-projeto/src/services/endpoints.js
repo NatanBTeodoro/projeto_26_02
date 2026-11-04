@@ -1,4 +1,5 @@
 export const endpoints = {
+  health: '/actuator/health',
   csrf: '/api/auth/csrf',
   login: '/api/auth/login',
   logout: '/api/auth/logout',
