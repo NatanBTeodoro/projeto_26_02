@@ -15,8 +15,8 @@ services:
     plan: free
     region: oregon
     rootDir: Back/projeto
-    dockerfilePath: Back/projeto/Dockerfile
-    dockerContext: Back/projeto
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /actuator/health
     envVars:
       - key: DATABASE_URL
@@ -50,7 +50,7 @@ services:
     runtime: static
     rootDir: Front/front-projeto
     buildCommand: npm ci && npm run build
-    staticPublishPath: Front/front-projeto/dist
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
