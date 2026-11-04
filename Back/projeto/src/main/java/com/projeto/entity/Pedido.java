@@ -11,12 +11,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -34,13 +31,6 @@ public class Pedido {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "estabelecimento_id", nullable = false)
-	private Estabelecimento estabelecimento;
-
-	@Column(name = "external_id", length = 80)
-	private String externalId;
-
 	@Column(name = "data_hora", nullable = false)
 	private Instant dataHora;
 
@@ -50,13 +40,6 @@ public class Pedido {
 
 	@Column(name = "motivo_estorno", length = 255)
 	private String motivoEstorno;
-
-	@Column(name = "cliente_hash", length = 128)
-	private String clienteHash;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "unidade_id")
-	private Unidade unidade;
 
 	@OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PedidoItem> itens = new ArrayList<>();

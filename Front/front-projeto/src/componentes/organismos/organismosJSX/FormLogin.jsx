@@ -21,7 +21,7 @@ import Titulo from '../../atomos/atomosJSX/Titulo'
 import Texto from '../../atomos/atomosJSX/Texto'
 import '../organismosCSS/FormLogin.css'
 
-function FormLogin({ onSubmit, onRecuperar, erroExterno = '', enviando = false }) {
+function FormLogin({ onSubmit, erroExterno = '', enviando = false }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erros, setErros] = useState({})
@@ -43,13 +43,12 @@ function FormLogin({ onSubmit, onRecuperar, erroExterno = '', enviando = false }
   return (
     <form className="form-login" onSubmit={aoEnviar}>
       <Titulo texto="Entrar" nivel={2} />
-      <Texto>A sessão fica no cookie do servidor. O front só guarda perfil e estabelecimento para a navegação.</Texto>
+      <Texto>A sessão fica no cookie do servidor.</Texto>
       <FormField id="email" rotulo="E-mail" tipo="email" valor={email} onChange={setEmail} erro={erros.email} obrigatorio />
       <FormFieldSenha id="senha" rotulo="Senha" valor={senha} onChange={setSenha} erro={erros.senha} obrigatorio />
       <MensagemErro texto={erroExterno} />
       <div className="formulario__acoes">
         <Botao texto={enviando ? 'Entrando...' : 'Entrar'} tipo="submit" desabilitado={enviando} />
-        <Botao texto="Recuperar senha" variante="fantasma" onClick={onRecuperar} />
       </div>
     </form>
   )

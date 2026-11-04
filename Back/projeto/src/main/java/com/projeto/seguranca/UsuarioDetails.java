@@ -13,7 +13,6 @@ import com.projeto.entity.enums.Perfil;
 public class UsuarioDetails implements UserDetails {
 
 	private final Long id;
-	private final Long estabelecimentoId;
 	private final String email;
 	private final String senhaHash;
 	private final Perfil perfil;
@@ -22,7 +21,6 @@ public class UsuarioDetails implements UserDetails {
 
 	public UsuarioDetails(Usuario usuario) {
 		this.id = usuario.getId();
-		this.estabelecimentoId = usuario.getEstabelecimento().getId();
 		this.email = usuario.getEmail();
 		this.senhaHash = usuario.getSenhaHash();
 		this.perfil = usuario.getPerfil();
@@ -31,7 +29,7 @@ public class UsuarioDetails implements UserDetails {
 	}
 
 	public UsuarioAtual atual() {
-		return new UsuarioAtual(id, estabelecimentoId, perfil, email);
+		return new UsuarioAtual(id, perfil, email);
 	}
 
 	@Override

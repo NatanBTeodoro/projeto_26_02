@@ -1,7 +1,6 @@
 package com.projeto.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import com.projeto.entity.Produto;
 
@@ -16,51 +15,38 @@ public final class ProdutoDTO {
 	}
 
 	public record Create(
-			@NotNull Long estabelecimentoId,
-			Long categoriaId,
-			@NotBlank @Size(max = 150) String nome,
-			@NotNull @DecimalMin("0.00") BigDecimal precoAtual,
-			BigDecimal custoAtual,
-			Boolean sazonal,
-			LocalDate janelaIni,
-			LocalDate janelaFim) {
+			@NotNull(message = "Informe a categoria") Long categoriaId,
+			@NotBlank(message = "Informe o nome") @Size(max = 150) String nome,
+			@NotNull(message = "Informe o preço") @DecimalMin(value = "0.00", message = "O preço precisa ser zero ou maior") BigDecimal precoAtual,
+			@DecimalMin(value = "0.00", message = "O custo precisa ser zero ou maior") BigDecimal custoAtual) {
 	}
 
 	public record Update(
-			Long categoriaId,
-			@NotBlank @Size(max = 150) String nome,
-			@NotNull @DecimalMin("0.00") BigDecimal precoAtual,
-			BigDecimal custoAtual,
-			Boolean sazonal,
-			LocalDate janelaIni,
-			LocalDate janelaFim,
+			@NotNull(message = "Informe a categoria") Long categoriaId,
+			@NotBlank(message = "Informe o nome") @Size(max = 150) String nome,
+			@NotNull(message = "Informe o preço") @DecimalMin(value = "0.00", message = "O preço precisa ser zero ou maior") BigDecimal precoAtual,
+			@DecimalMin(value = "0.00", message = "O custo precisa ser zero ou maior") BigDecimal custoAtual,
 			Boolean ativo) {
 	}
 
 	public record Response(
 			Long id,
-			Long estabelecimentoId,
 			Long categoriaId,
+			String categoriaNome,
 			String nome,
 			BigDecimal precoAtual,
 			BigDecimal custoAtual,
-			boolean sazonal,
-			LocalDate janelaIni,
-			LocalDate janelaFim,
 			boolean ativo) {
 
-		public static Response from(Produto p) {
+		public static Response de(Produto produto) {
 			return new Response(
-					p.getId(),
-					p.getEstabelecimento().getId(),
-					p.getCategoria() != null ? p.getCategoria().getId() : null,
-					p.getNome(),
-					p.getPrecoAtual(),
-					p.getCustoAtual(),
-					p.isSazonal(),
-					p.getJanelaIni(),
-					p.getJanelaFim(),
-					p.isAtivo());
+					produto.getId(),
+					produto.getCategoria().getId(),
+					produto.getCategoria().getNome(),
+					produto.getNome(),
+					produto.getPrecoAtual(),
+					produto.getCustoAtual(),
+					produto.isAtivo());
 		}
 	}
 }

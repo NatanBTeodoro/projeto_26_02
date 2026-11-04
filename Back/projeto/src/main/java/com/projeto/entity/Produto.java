@@ -1,7 +1,6 @@
 package com.projeto.entity;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,11 +27,7 @@ public class Produto {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "estabelecimento_id", nullable = false)
-	private Estabelecimento estabelecimento;
-
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "categoria_id")
+	@JoinColumn(name = "categoria_id", nullable = false)
 	private Categoria categoria;
 
 	@Column(nullable = false, length = 150)
@@ -43,15 +38,6 @@ public class Produto {
 
 	@Column(name = "custo_atual", precision = 12, scale = 2)
 	private BigDecimal custoAtual;
-
-	@Column(nullable = false)
-	private boolean sazonal;
-
-	@Column(name = "janela_ini")
-	private LocalDate janelaIni;
-
-	@Column(name = "janela_fim")
-	private LocalDate janelaFim;
 
 	@Column(nullable = false)
 	private boolean ativo = true;

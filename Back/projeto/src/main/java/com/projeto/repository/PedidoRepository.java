@@ -1,18 +1,15 @@
 package com.projeto.repository;
 
-import java.util.Optional;
+import java.time.Instant;
+import java.util.List;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.projeto.entity.Pedido;
 
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
-	Page<Pedido> findByEstabelecimentoId(Long estabelecimentoId, Pageable pageable);
+	List<Pedido> findAllByOrderByDataHoraDesc();
 
-	Optional<Pedido> findByIdAndEstabelecimentoId(Long id, Long estabelecimentoId);
-
-	boolean existsByEstabelecimentoIdAndExternalId(Long estabelecimentoId, String externalId);
+	List<Pedido> findByDataHoraGreaterThanEqualAndDataHoraLessThan(Instant inicio, Instant fim);
 }

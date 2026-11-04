@@ -35,9 +35,9 @@ function Login() {
       }
       const texto = await response.text()
       let usuario = texto ? JSON.parse(texto) : null
-      if (!usuario?.perfil) usuario = await apiJson(endpoints.sessao)
+      if (!usuario?.perfil) usuario = await apiJson(endpoints.eu)
       gravarSessao(usuario)
-      window.location.href = '/'
+      window.location.href = '/produtos'
     } catch {
       setErroApi('Erro de conexão. Tente novamente.')
     } finally {
@@ -50,7 +50,6 @@ function Login() {
       <div className="login">
         <FormLogin
           onSubmit={handleLogin}
-          onRecuperar={() => { window.location.href = '/recuperar-senha' }}
           erroExterno={erroApi}
           enviando={enviando}
         />

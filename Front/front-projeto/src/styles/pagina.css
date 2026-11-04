@@ -28,6 +28,19 @@
   gap: 1.25rem;
 }
 
+.tabela {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabela th,
+.tabela td {
+  text-align: left;
+  padding: 0.45rem 0.35rem;
+  border-bottom: 1px solid var(--cor-linha);
+  vertical-align: top;
+}
+
 .formulario {
   display: flex;
   flex-direction: column;

@@ -1,22 +1,17 @@
 package com.projeto.service;
 
+import java.util.List;
 import java.util.Locale;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.projeto.dto.UsuarioDTO;
-import com.projeto.entity.Estabelecimento;
 import com.projeto.entity.Usuario;
-import com.projeto.repository.EstabelecimentoRepository;
+import com.projeto.entity.enums.Perfil;
 import com.projeto.repository.UsuarioRepository;
-import com.projeto.seguranca.Acesso;
-import com.projeto.seguranca.PoliticaSenha;
-import com.projeto.seguranca.UsuarioAtual;
-import com.projeto.util.exception.RecursoJaExistenteException;
+import com.projeto.seguranca.SessaoAtual;
 import com.projeto.util.exception.RecursoNaoEncontradoException;
 import com.projeto.util.exception.RegraDeNegocioException;
 
@@ -25,85 +20,74 @@ import com.projeto.util.exception.RegraDeNegocioException;
 public class UsuarioService {
 
 	private final UsuarioRepository usuarioRepository;
-	private final EstabelecimentoRepository estabelecimentoRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final SessaoAtual sessaoAtual;
 
 	public UsuarioService(
 			UsuarioRepository usuarioRepository,
-			EstabelecimentoRepository estabelecimentoRepository,
-			PasswordEncoder passwordEncoder) {
+			PasswordEncoder passwordEncoder,
+			SessaoAtual sessaoAtual) {
 		this.usuarioRepository = usuarioRepository;
-		this.estabelecimentoRepository = estabelecimentoRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.sessaoAtual = sessaoAtual;
 	}
 
-	public Page<UsuarioDTO.Response> listar(Pageable pageable, UsuarioAtual sessao) {
-		Acesso.exigirAdministrador(sessao);
-		return usuarioRepository.findByEstabelecimentoId(sessao.estabelecimentoId(), pageable)
-				.map(UsuarioDTO.Response::from);
-	}
-
-	public UsuarioDTO.Response buscar(Long id, UsuarioAtual sessao) {
-		Acesso.exigirAdministrador(sessao);
-		return UsuarioDTO.Response.from(carregar(id, sessao));
+	public List<UsuarioDTO.Response> listar() {
+		return usuarioRepository.findAllByOrderByEmailAsc().stream().map(UsuarioDTO.Response::de).toList();
 	}
 
 	@Transactional
-	public UsuarioDTO.Response criar(UsuarioDTO.Create dto, UsuarioAtual sessao) {
-		Acesso.exigirAdministrador(sessao);
-		Acesso.exigirMesmoEstabelecimento(dto.estabelecimentoId(), sessao);
+	public UsuarioDTO.Response criar(UsuarioDTO.Create dto) {
 		String email = normalizar(dto.email());
-		PoliticaSenha.validar(dto.senha());
 		if (usuarioRepository.existsByEmailIgnoreCase(email)) {
-			throw new RecursoJaExistenteException("E-mail já cadastrado");
+			throw new RegraDeNegocioException("E-mail já cadastrado");
 		}
-		Estabelecimento estabelecimento = estabelecimentoRepository.findById(sessao.estabelecimentoId())
-				.orElseThrow(() -> new RecursoNaoEncontradoException("Estabelecimento", sessao.estabelecimentoId()));
+		exigirPerfil(dto.perfil());
 		Usuario usuario = new Usuario();
-		usuario.setEstabelecimento(estabelecimento);
 		usuario.setEmail(email);
 		usuario.setSenhaHash(passwordEncoder.encode(dto.senha()));
 		usuario.setPerfil(dto.perfil());
 		usuario.setAtivo(true);
-		Usuario salvo = usuarioRepository.save(usuario);
-		if (salvo.getSenhaHash().equals(dto.senha())) {
-			throw new IllegalStateException("Senha não pode ser persistida em texto");
-		}
-		return UsuarioDTO.Response.from(salvo);
+		return UsuarioDTO.Response.de(usuarioRepository.save(usuario));
 	}
 
 	@Transactional
-	public UsuarioDTO.Response atualizar(Long id, UsuarioDTO.Update dto, UsuarioAtual sessao) {
-		Acesso.exigirAdministrador(sessao);
-		Usuario usuario = carregar(id, sessao);
+	public UsuarioDTO.Response atualizar(Long id, UsuarioDTO.Update dto) {
+		Usuario usuario = carregar(id);
 		if (dto.email() != null && !dto.email().isBlank()) {
 			String email = normalizar(dto.email());
 			usuarioRepository.findByEmailIgnoreCase(email)
 					.filter(outro -> !outro.getId().equals(usuario.getId()))
 					.ifPresent(outro -> {
-						throw new RecursoJaExistenteException("E-mail já cadastrado");
+						throw new RegraDeNegocioException("E-mail já cadastrado");
 					});
 			usuario.setEmail(email);
 		}
 		if (dto.senha() != null && !dto.senha().isBlank()) {
-			PoliticaSenha.validar(dto.senha());
 			usuario.setSenhaHash(passwordEncoder.encode(dto.senha()));
 		}
 		if (dto.perfil() != null) {
+			exigirPerfil(dto.perfil());
 			usuario.setPerfil(dto.perfil());
 		}
 		if (dto.ativo() != null) {
-			if (!dto.ativo() && usuario.getId().equals(sessao.id())) {
+			if (!dto.ativo() && usuario.getId().equals(sessaoAtual.exigir().id())) {
 				throw new RegraDeNegocioException("Não é possível inativar o próprio usuário");
 			}
 			usuario.setAtivo(dto.ativo());
 		}
-		return UsuarioDTO.Response.from(usuarioRepository.save(usuario));
+		return UsuarioDTO.Response.de(usuarioRepository.save(usuario));
 	}
 
-	private Usuario carregar(Long id, UsuarioAtual sessao) {
-		return usuarioRepository.findByIdAndEstabelecimentoId(id, sessao.estabelecimentoId())
-				.orElseThrow(() -> new RecursoNaoEncontradoException("Usuário", id));
+	private Usuario carregar(Long id) {
+		return usuarioRepository.findById(id)
+				.orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado"));
+	}
+
+	private void exigirPerfil(Perfil perfil) {
+		if (perfil != Perfil.ADMINISTRADOR && perfil != Perfil.GESTOR) {
+			throw new RegraDeNegocioException("Perfil inválido");
+		}
 	}
 
 	private String normalizar(String email) {

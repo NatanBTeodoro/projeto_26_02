@@ -2,9 +2,8 @@ package com.projeto.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public record LoginRequest(
-		@NotBlank @Email @Size(max = 255) String email,
-		@NotBlank @Size(max = 72) String senha) {
+		@NotBlank(message = "Informe o e-mail") @Email(message = "Informe um e-mail válido") String email,
+		@NotBlank(message = "Informe a senha") String senha) {
 }

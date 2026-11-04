@@ -1,91 +1,137 @@
-// paginas/paginasJSX/Usuarios.jsx
-
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import TemplateAutenticado from '../../templates/templatesJSX/TemplateAutenticado'
 import CabecalhoPagina from '../../moleculas/moleculasJSX/CabecalhoPagina'
-import FormUsuario from '../../organismos/organismosJSX/FormUsuario'
-import ListaRecurso from '../../organismos/organismosJSX/ListaRecurso'
-import AvisosApi from '../../organismos/organismosJSX/AvisosApi'
 import FormField from '../../moleculas/moleculasJSX/FormField'
+import Select from '../../atomos/atomosJSX/Select'
 import Botao from '../../atomos/atomosJSX/Botao'
+import MensagemErro from '../../atomos/atomosJSX/MensagemErro'
 import { apiJson } from '../../../services/api'
 import { endpoints } from '../../../services/endpoints'
 import { lerSessao } from '../../../utils/sessao'
 import { formatarBooleano, rotuloPerfil } from '../../../utils/formatacao'
-import { useRetornoApi } from '../../../utils/useRetornoApi'
-import '../paginasCSS/Usuarios.css'
+
+const perfis = [
+  { valor: 'GESTOR', rotulo: 'Gestor' },
+  { valor: 'ADMINISTRADOR', rotulo: 'Administrador' },
+]
 
 function Usuarios() {
   const sessao = lerSessao()
-  const { erro, sucesso, resposta, enviando, executar } = useRetornoApi()
-  const [tick, setTick] = useState(0)
-  const [id, setId] = useState('')
-  const [atual, setAtual] = useState(null)
+  const [usuarios, setUsuarios] = useState([])
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
+  const [perfil, setPerfil] = useState('GESTOR')
+  const [erro, setErro] = useState('')
+  const [aviso, setAviso] = useState('')
 
-  async function criar(dados) {
-    const corpo = await executar(
-      () => apiJson(endpoints.usuarios, { method: 'POST', body: JSON.stringify(dados) }),
-      'Usuário cadastrado.',
-    )
-    if (corpo) setTick((valor) => valor + 1)
+  async function carregar() {
+    setUsuarios(await apiJson(endpoints.usuarios))
   }
 
-  async function salvar(dados) {
-    const corpo = await executar(
-      () => apiJson(endpoints.usuario(id), { method: 'PUT', body: JSON.stringify(dados) }),
-      'Usuário atualizado.',
-    )
-    if (corpo) {
-      setAtual(corpo)
-      setTick((valor) => valor + 1)
+  useEffect(() => {
+    if (sessao.perfil !== 'ADMINISTRADOR') return
+    carregar().catch((falha) => setErro(falha.message))
+  }, [sessao.perfil])
+
+  async function criar(evento) {
+    evento.preventDefault()
+    setErro('')
+    try {
+      await apiJson(endpoints.usuarios, {
+        method: 'POST',
+        body: JSON.stringify({ email, senha, perfil }),
+      })
+      setEmail('')
+      setSenha('')
+      setAviso('Usuário cadastrado.')
+      await carregar()
+    } catch (falha) {
+      setErro(falha.message)
     }
   }
 
-  async function carregar() {
-    const corpo = await executar(() => apiJson(endpoints.usuario(id)), '')
-    if (corpo) setAtual(corpo)
+  async function atualizar(usuario, campos) {
+    setErro('')
+    try {
+      await apiJson(endpoints.usuario(usuario.id), {
+        method: 'PUT',
+        body: JSON.stringify(campos),
+      })
+      setAviso('Usuário atualizado.')
+      await carregar()
+    } catch (falha) {
+      setErro(falha.message)
+    }
+  }
+
+  if (sessao.perfil !== 'ADMINISTRADOR') {
+    return (
+      <TemplateAutenticado rotaAtual="/usuarios">
+        <div className="pagina">
+          <CabecalhoPagina titulo="Usuários" />
+          <MensagemErro texto="Acesso negado" />
+        </div>
+      </TemplateAutenticado>
+    )
   }
 
   return (
     <TemplateAutenticado rotaAtual="/usuarios">
-      <div className="usuarios">
+      <div className="pagina">
         <CabecalhoPagina
-          titulo="Usuários e perfis"
-          descricao="Um perfil por usuário. Inativar impede o próximo login. A resposta nunca traz a senha."
-          perfis={['Administrador']}
+          titulo="Usuários"
+          descricao="O administrador redefine a senha. A resposta da API não devolve o hash."
         />
-        <div className="pagina__grade pagina__grade--lateral">
-          <section className="pagina__painel">
-            <FormUsuario estabelecimentoId={sessao.estabelecimentoId} onSubmit={criar} enviando={enviando} />
-            <div className="formulario__linha">
-              <FormField id="usuario-id" rotulo="Id para editar" tipo="number" minimo="1" valor={id} onChange={setId} />
-              <Botao texto="Carregar" variante="secundario" onClick={carregar} desabilitado={!id} />
-            </div>
-            {atual ? (
-              <FormUsuario
-                key={`${atual.id}-${atual.email}-${atual.perfil}-${atual.ativo}`}
-                modo="editar"
-                valoresIniciais={atual}
-                onSubmit={salvar}
-                enviando={enviando}
-              />
-            ) : null}
-            <AvisosApi erro={erro} sucesso={sucesso} resposta={resposta} />
-          </section>
-          <section className="pagina__painel">
-            <ListaRecurso
-              caminho={endpoints.usuarios}
-              ordenacaoPadrao="email,asc"
-              atualizacao={tick}
-              colunas={[
-                { chave: 'id', rotulo: 'Id' },
-                { chave: 'email', rotulo: 'E-mail' },
-                { chave: 'perfil', rotulo: 'Perfil', formatar: rotuloPerfil },
-                { chave: 'ativo', rotulo: 'Ativo', formatar: formatarBooleano },
-              ]}
-            />
-          </section>
-        </div>
+        <MensagemErro texto={erro} />
+        {aviso ? <p>{aviso}</p> : null}
+        <form className="formulario pagina__painel" onSubmit={criar}>
+          <FormField id="email" rotulo="E-mail" tipo="email" valor={email} onChange={setEmail} obrigatorio />
+          <FormField id="senha" rotulo="Senha" tipo="password" valor={senha} onChange={setSenha} obrigatorio />
+          <label htmlFor="perfil">Perfil</label>
+          <Select id="perfil" valor={perfil} onChange={setPerfil} opcoes={perfis} />
+          <Botao texto="Cadastrar" tipo="submit" />
+        </form>
+        <table className="tabela">
+          <thead>
+            <tr>
+              <th>E-mail</th>
+              <th>Perfil</th>
+              <th>Ativo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {usuarios.map((usuario) => (
+              <tr key={usuario.id}>
+                <td>{usuario.email}</td>
+                <td>{rotuloPerfil(usuario.perfil)}</td>
+                <td>{formatarBooleano(usuario.ativo)}</td>
+                <td>
+                  <Botao
+                    texto={usuario.perfil === 'ADMINISTRADOR' ? 'Tornar gestor' : 'Tornar administrador'}
+                    variante="secundario"
+                    onClick={() => atualizar(usuario, {
+                      perfil: usuario.perfil === 'ADMINISTRADOR' ? 'GESTOR' : 'ADMINISTRADOR',
+                    })}
+                  />
+                  <Botao
+                    texto={usuario.ativo ? 'Inativar' : 'Reativar'}
+                    variante="fantasma"
+                    onClick={() => atualizar(usuario, { ativo: !usuario.ativo })}
+                  />
+                  <Botao
+                    texto="Redefinir senha"
+                    variante="fantasma"
+                    onClick={() => {
+                      const nova = window.prompt('Nova senha')
+                      if (nova) atualizar(usuario, { senha: nova })
+                    }}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </TemplateAutenticado>
   )

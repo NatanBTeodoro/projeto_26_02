@@ -21,59 +21,51 @@ public final class PedidoDTO {
 	}
 
 	public record ItemCreate(
-			@NotNull Long produtoId,
-			@NotNull @Min(1) Integer quantidade) {
+			@NotNull(message = "Informe o produto") Long produtoId,
+			@NotNull(message = "Informe a quantidade") @Min(value = 1, message = "A quantidade precisa ser maior que zero") Integer quantidade) {
 	}
 
 	public record Create(
-			@NotNull Long estabelecimentoId,
-			@Size(max = 80) String externalId,
 			Instant dataHora,
-			@NotEmpty @Valid List<ItemCreate> itens,
-			Long unidadeId,
-			@Size(max = 120) String clienteCodigo) {
+			@NotEmpty(message = "O pedido precisa de ao menos um item") @Valid List<ItemCreate> itens) {
 	}
 
-	public record Estorno(@NotBlank @Size(max = 255) String motivo) {
+	public record Estorno(@NotBlank(message = "Informe o motivo do estorno") @Size(max = 255) String motivo) {
 	}
 
 	public record ItemResponse(
 			Long id,
 			Long produtoId,
+			String produtoNome,
 			Integer quantidade,
 			BigDecimal precoUnitario,
 			BigDecimal custoUnitario) {
 
-		public static ItemResponse from(PedidoItem item, boolean ocultarCusto) {
+		public static ItemResponse de(PedidoItem item) {
 			return new ItemResponse(
 					item.getId(),
 					item.getProduto().getId(),
+					item.getProduto().getNome(),
 					item.getQuantidade(),
 					item.getPrecoUnitario(),
-					ocultarCusto ? null : item.getCustoUnitario());
+					item.getCustoUnitario());
 		}
 	}
 
 	public record Response(
 			Long id,
-			Long estabelecimentoId,
-			Long unidadeId,
-			String externalId,
 			Instant dataHora,
 			StatusPedido status,
 			String motivoEstorno,
 			List<ItemResponse> itens) {
 
-		public static Response from(Pedido pedido, boolean ocultarCusto) {
+		public static Response de(Pedido pedido) {
 			return new Response(
 					pedido.getId(),
-					pedido.getEstabelecimento().getId(),
-					pedido.getUnidade() != null ? pedido.getUnidade().getId() : null,
-					pedido.getExternalId(),
 					pedido.getDataHora(),
 					pedido.getStatus(),
 					pedido.getMotivoEstorno(),
-					pedido.getItens().stream().map(item -> ItemResponse.from(item, ocultarCusto)).toList());
+					pedido.getItens().stream().map(ItemResponse::de).toList());
 		}
 	}
 }

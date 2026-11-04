@@ -5,6 +5,5 @@ public enum ClasseMenu {
 	VACA_LEITEIRA,
 	ENIGMA,
 	CAO,
-	EM_OBSERVACAO,
 	DADO_INCOMPLETO
 }
