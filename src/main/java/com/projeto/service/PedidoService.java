@@ -1,7 +1,9 @@
 package com.projeto.service;
 
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,8 +41,8 @@ public class PedidoService {
 		Pedido pedido = new Pedido();
 		pedido.setDataHora(dto.dataHora() == null ? agora : dto.dataHora());
 		pedido.setStatus(StatusPedido.ATIVO);
-		for (PedidoDTO.ItemCreate item : dto.itens()) {
-			Produto produto = produtoRepository.findById(item.produtoId())
+		for (Map.Entry<Long, Integer> entrada : agrupar(dto.itens()).entrySet()) {
+			Produto produto = produtoRepository.findById(entrada.getKey())
 					.orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado"));
 			if (!produto.isAtivo()) {
 				throw new RegraDeNegocioException("Produto inativo não entra em pedido novo");
@@ -48,12 +50,20 @@ public class PedidoService {
 			PedidoItem linha = new PedidoItem();
 			linha.setPedido(pedido);
 			linha.setProduto(produto);
-			linha.setQuantidade(item.quantidade());
+			linha.setQuantidade(entrada.getValue());
 			linha.setPrecoUnitario(produto.getPrecoAtual());
 			linha.setCustoUnitario(produto.getCustoAtual());
 			pedido.getItens().add(linha);
 		}
 		return PedidoDTO.Response.de(pedidoRepository.save(pedido));
+	}
+
+	static Map<Long, Integer> agrupar(List<PedidoDTO.ItemCreate> itens) {
+		Map<Long, Integer> quantidades = new LinkedHashMap<>();
+		for (PedidoDTO.ItemCreate item : itens) {
+			quantidades.merge(item.produtoId(), item.quantidade(), Math::addExact);
+		}
+		return quantidades;
 	}
 
 	@Transactional
