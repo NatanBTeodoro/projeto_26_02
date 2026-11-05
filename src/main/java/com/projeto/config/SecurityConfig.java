@@ -1,6 +1,7 @@
 package com.projeto.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -47,6 +48,7 @@ public class SecurityConfig {
 		}
 		cors.addAllowedHeader("*");
 		cors.addAllowedMethod("*");
+		cors.addExposedHeader(HttpHeaders.CONTENT_DISPOSITION);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", cors);
 		return source;

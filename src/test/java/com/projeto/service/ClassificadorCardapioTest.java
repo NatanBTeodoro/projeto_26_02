@@ -1,6 +1,7 @@
 package com.projeto.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.math.BigDecimal;
@@ -23,6 +24,10 @@ class ClassificadorCardapioTest {
 		List<ClassificadorCardapio.Item> itens = ClassificadorCardapio.classificar(linhas);
 
 		assertEquals(new BigDecimal("1650.00"), ClassificadorCardapio.receita(linhas));
+		ClassificadorCardapio.Resultado resultado = ClassificadorCardapio.resultado(linhas);
+		assertEquals(new BigDecimal("17.5000"), resultado.limitePopularidade());
+		assertEquals(new BigDecimal("6.50"), resultado.margemMedia());
+		assertEquals(ClasseMenu.ESTRELA.getRecomendacao(), item(itens, "A").recomendacao());
 		assertEquals(ClasseMenu.ESTRELA, item(itens, "A").classe());
 		assertEquals(new BigDecimal("10.00"), item(itens, "A").margem());
 		assertEquals(new BigDecimal("40.0000"), item(itens, "A").popularidade());
@@ -50,6 +55,14 @@ class ClassificadorCardapioTest {
 		assertEquals(ClasseMenu.ESTRELA, item(ClassificadorCardapio.classificar(linhas), "A").classe());
 	}
 
+	@Test
+	void todaClasseTemRecomendacao() {
+		for (ClasseMenu classe : ClasseMenu.values()) {
+			assertFalse(classe.getRecomendacao().isBlank());
+			assertFalse(classe.getRotulo().isBlank());
+		}
+	}
+
 	private static ClassificadorCardapio.Linha linha(
 			long id,
 			String nome,
@@ -61,7 +74,8 @@ class ClassificadorCardapioTest {
 				nome,
 				quantidade,
 				new BigDecimal(preco),
-				custo == null ? null : new BigDecimal(custo));
+				custo == null ? null : new BigDecimal(custo),
+				"");
 	}
 
 	private static ClassificadorCardapio.Item item(List<ClassificadorCardapio.Item> itens, String nome) {

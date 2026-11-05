@@ -19,12 +19,16 @@ public final class LeituraVendas {
 				continue;
 			}
 			for (PedidoItem item : pedido.getItens()) {
+				String categoria = item.getProduto().getCategoria() == null
+						? ""
+						: item.getProduto().getCategoria().getNome();
 				linhas.add(new ClassificadorCardapio.Linha(
 						item.getProduto().getId(),
 						item.getProduto().getNome(),
 						item.getQuantidade(),
 						item.getPrecoUnitario(),
-						item.getCustoUnitario()));
+						item.getCustoUnitario(),
+						categoria));
 			}
 		}
 		return linhas;

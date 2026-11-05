@@ -18,7 +18,13 @@ public final class ClassificadorCardapio {
 	private ClassificadorCardapio() {
 	}
 
-	public record Linha(long produtoId, String nome, int quantidade, BigDecimal preco, BigDecimal custo) {
+	public record Linha(
+			long produtoId,
+			String nome,
+			int quantidade,
+			BigDecimal preco,
+			BigDecimal custo,
+			String categoria) {
 	}
 
 	public record Item(
@@ -27,19 +33,29 @@ public final class ClassificadorCardapio {
 			long quantidade,
 			BigDecimal popularidade,
 			BigDecimal margem,
-			ClasseMenu classe) {
+			ClasseMenu classe,
+			String categoria,
+			String recomendacao) {
+	}
+
+	public record Resultado(List<Item> itens, BigDecimal limitePopularidade, BigDecimal margemMedia) {
 	}
 
 	public static List<Item> classificar(List<Linha> linhas) {
+		return resultado(linhas).itens();
+	}
+
+	public static Resultado resultado(List<Linha> linhas) {
 		Map<Long, Acumulo> porProduto = new LinkedHashMap<>();
 		long total = 0;
 		for (Linha linha : linhas) {
-			Acumulo acumulo = porProduto.computeIfAbsent(linha.produtoId(), id -> new Acumulo(id, linha.nome()));
+			Acumulo acumulo = porProduto.computeIfAbsent(
+					linha.produtoId(), id -> new Acumulo(id, linha.nome(), linha.categoria()));
 			acumulo.somar(linha);
 			total += linha.quantidade();
 		}
 		if (total == 0) {
-			return List.of();
+			return new Resultado(List.of(), null, null);
 		}
 
 		List<Acumulo> elegiveis = porProduto.values().stream().filter(Acumulo::custoCompleto).toList();
@@ -47,6 +63,10 @@ public final class ClassificadorCardapio {
 		BigDecimal limite = elegiveis.isEmpty()
 				? null
 				: LIMITE_POPULARIDADE.divide(BigDecimal.valueOf(elegiveis.size()), ESCALA_CONTA, RoundingMode.HALF_UP);
+		BigDecimal limitePopularidade = limite == null
+				? null
+				: limite.multiply(new BigDecimal("100")).setScale(4, RoundingMode.HALF_UP);
+		BigDecimal margemMedia = media == null ? null : media.setScale(2, RoundingMode.HALF_UP);
 
 		List<Item> itens = new ArrayList<>();
 		for (Acumulo acumulo : porProduto.values()) {
@@ -64,7 +84,7 @@ public final class ClassificadorCardapio {
 			itens.add(acumulo.item(popularidade, margem, classe));
 		}
 		itens.sort(Comparator.comparing(Item::nome, String.CASE_INSENSITIVE_ORDER));
-		return List.copyOf(itens);
+		return new Resultado(List.copyOf(itens), limitePopularidade, margemMedia);
 	}
 
 	public static BigDecimal receita(List<Linha> linhas) {
@@ -104,13 +124,15 @@ public final class ClassificadorCardapio {
 	private static final class Acumulo {
 		private final long produtoId;
 		private final String nome;
+		private final String categoria;
 		private long quantidade;
 		private BigDecimal somaMargem = BigDecimal.ZERO;
 		private boolean custoCompleto = true;
 
-		private Acumulo(long produtoId, String nome) {
+		private Acumulo(long produtoId, String nome, String categoria) {
 			this.produtoId = produtoId;
 			this.nome = nome;
+			this.categoria = categoria == null ? "" : categoria;
 		}
 
 		private void somar(Linha linha) {
@@ -132,7 +154,15 @@ public final class ClassificadorCardapio {
 		}
 
 		private Item item(BigDecimal popularidade, BigDecimal margem, ClasseMenu classe) {
-			return new Item(produtoId, nome, quantidade, popularidade, margem, classe);
+			return new Item(
+					produtoId,
+					nome,
+					quantidade,
+					popularidade,
+					margem,
+					classe,
+					categoria,
+					classe.getRecomendacao());
 		}
 	}
 }

@@ -6,6 +6,8 @@ COPY src ./src
 RUN mvn -B clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
+ENV TZ=America/Sao_Paulo
+ENV JAVA_TOOL_OPTIONS="-Duser.timezone=America/Sao_Paulo"
 WORKDIR /app
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring

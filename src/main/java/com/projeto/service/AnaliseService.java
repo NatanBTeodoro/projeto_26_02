@@ -43,15 +43,24 @@ public class AnaliseService {
 		BigDecimal ticket = quantidadePedidos == 0
 				? BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)
 				: receita.divide(BigDecimal.valueOf(quantidadePedidos), 2, RoundingMode.HALF_UP);
-		List<AnaliseDTO.Item> itens = ClassificadorCardapio.classificar(linhas).stream()
+		ClassificadorCardapio.Resultado resultado = ClassificadorCardapio.resultado(linhas);
+		List<AnaliseDTO.Item> itens = resultado.itens().stream()
 				.map(item -> new AnaliseDTO.Item(
 						item.produtoId(),
 						item.nome(),
+						item.categoria(),
 						item.quantidade(),
 						item.popularidade(),
 						item.margem(),
-						item.classe()))
+						item.classe(),
+						item.recomendacao()))
 				.toList();
-		return new AnaliseDTO.Response(quantidadePedidos, receita, ticket, itens);
+		return new AnaliseDTO.Response(
+				quantidadePedidos,
+				receita,
+				ticket,
+				resultado.limitePopularidade(),
+				resultado.margemMedia(),
+				itens);
 	}
 }

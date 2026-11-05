@@ -13,16 +13,20 @@ public final class AnaliseDTO {
 	public record Item(
 			Long produtoId,
 			String nome,
+			String categoria,
 			long quantidade,
 			BigDecimal popularidade,
 			BigDecimal margem,
-			ClasseMenu classe) {
+			ClasseMenu classe,
+			String recomendacao) {
 	}
 
 	public record Response(
 			long quantidadePedidos,
 			BigDecimal receita,
 			BigDecimal ticketMedio,
+			BigDecimal limitePopularidade,
+			BigDecimal margemMedia,
 			List<Item> itens) {
 	}
 }
